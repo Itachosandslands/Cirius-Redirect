@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecionando - NOXXIT</title>
+</head>
+<body>
+    <p>Autenticando com o Mercado Pago, aguarde...</p>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const state = urlParams.get('state');
+        const error = urlParams.get('error');
+
+        // ⚠️ COLOQUE AQUI O LINK ATUAL DO SEU REPLIT 
+        const replitDomain = "COLE_SEU_LINK_DO_REPLIT_AQUI_SEM_BARRA_NO_FINAL";
+
+        if (replitDomain && (code || error)) {
+            window.location.href = `${replitDomain}/oauth/callback${window.location.search}`;
+        } else {
+            document.body.innerHTML = "<h3>Erro: Parâmetros de autorização não encontrados.</h3>";
+        }
+    </script>
+</body>
+</html>
