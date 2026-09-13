@@ -8,11 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
             --primary: #009ee3;
@@ -23,7 +19,15 @@
             --text: #e6edf3;
             --text-dim: #8b95a5;
             --success: #00d68f;
+            --success-glow: rgba(0, 214, 143, 0.4);
             --error: #ff4d6d;
+            --error-glow: rgba(255, 77, 109, 0.4);
+            --warning: #ffb547;
+            --warning-glow: rgba(255, 181, 71, 0.4);
+        }
+
+        html, body {
+            height: 100%;
         }
 
         body {
@@ -36,43 +40,47 @@
             justify-content: center;
             overflow: hidden;
             position: relative;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* Partículas de fundo */
         body::before,
         body::after {
             content: '';
             position: absolute;
             border-radius: 50%;
             filter: blur(120px);
-            opacity: 0.35;
+            opacity: 0.3;
             pointer-events: none;
+            transition: background 0.8s ease, opacity 0.8s ease;
         }
 
         body::before {
-            width: 500px;
-            height: 500px;
+            width: 520px; height: 520px;
             background: var(--primary);
-            top: -200px;
-            left: -200px;
+            top: -200px; left: -200px;
             animation: float 12s ease-in-out infinite;
         }
 
         body::after {
-            width: 400px;
-            height: 400px;
+            width: 420px; height: 420px;
             background: var(--accent);
-            bottom: -150px;
-            right: -150px;
+            bottom: -150px; right: -150px;
             animation: float 15s ease-in-out infinite reverse;
         }
+
+        /* Tema de fundo conforme o estado */
+        body[data-theme="success"]::before { background: var(--success); opacity: 0.25; }
+        body[data-theme="success"]::after  { background: #00ffb3; opacity: 0.2; }
+        body[data-theme="error"]::before   { background: var(--error); opacity: 0.25; }
+        body[data-theme="error"]::after    { background: #ff8fa3; opacity: 0.18; }
+        body[data-theme="warning"]::before { background: var(--warning); opacity: 0.25; }
+        body[data-theme="warning"]::after  { background: #ffd58f; opacity: 0.18; }
 
         @keyframes float {
             0%, 100% { transform: translate(0, 0) scale(1); }
             50% { transform: translate(60px, 40px) scale(1.15); }
         }
 
-        /* Grid sutil de fundo */
         .grid-bg {
             position: absolute;
             inset: 0;
@@ -95,14 +103,8 @@
         }
 
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(24px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .card {
@@ -124,14 +126,20 @@
         .card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            top: 0; left: 0; right: 0;
             height: 1px;
             background: linear-gradient(90deg, transparent, rgba(0, 158, 227, 0.6), transparent);
+            transition: background 0.6s ease;
         }
 
-        /* Logo / Marca */
+        .card[data-state="success"]::before {
+            background: linear-gradient(90deg, transparent, rgba(0, 214, 143, 0.7), transparent);
+        }
+        .card[data-state="error"]::before {
+            background: linear-gradient(90deg, transparent, rgba(255, 77, 109, 0.7), transparent);
+        }
+
+        /* Marca */
         .brand {
             display: inline-flex;
             align-items: center;
@@ -144,8 +152,7 @@
         }
 
         .brand-mark {
-            width: 34px;
-            height: 34px;
+            width: 34px; height: 34px;
             border-radius: 10px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
             display: flex;
@@ -153,12 +160,12 @@
             justify-content: center;
             position: relative;
             box-shadow: 0 6px 20px rgba(0, 158, 227, 0.4);
+            transition: background 0.6s ease, box-shadow 0.6s ease;
         }
 
         .brand-mark::after {
             content: '';
-            width: 12px;
-            height: 12px;
+            width: 12px; height: 12px;
             border: 2.5px solid white;
             border-radius: 4px;
             border-right-color: transparent;
@@ -167,12 +174,45 @@
             margin-top: 2px;
         }
 
-        /* Spinner */
+        .card[data-state="success"] .brand-mark {
+            background: linear-gradient(135deg, var(--success) 0%, #00ffb3 100%);
+            box-shadow: 0 6px 20px var(--success-glow);
+        }
+
+        /* Área de ícone central */
+        .icon-stage {
+            position: relative;
+            width: 104px;
+            height: 104px;
+            margin: 0 auto 28px;
+        }
+
+        .icon-layer {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0.85);
+            transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+        }
+
+        .card[data-state="loading"] .icon-layer.loading,
+        .card[data-state="success"] .icon-layer.success,
+        .card[data-state="error"] .icon-layer.error,
+        .card[data-state="warning"] .icon-layer.warning {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        /* Loading */
         .spinner-wrap {
             position: relative;
             width: 88px;
             height: 88px;
-            margin: 0 auto 28px;
         }
 
         .spinner-wrap::before,
@@ -210,19 +250,81 @@
         }
 
         .spinner-core svg {
-            width: 24px;
-            height: 24px;
+            width: 24px; height: 24px;
             color: var(--accent);
             filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.6));
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
+        @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes pulse {
             0%, 100% { transform: scale(1); opacity: 0.9; }
             50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        /* Estado final — círculos sólidos */
+        .state-circle {
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .state-circle::after {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            border: 1px solid currentColor;
+            opacity: 0.2;
+            animation: ripple 2.4s ease-out infinite;
+        }
+
+        @keyframes ripple {
+            0% { transform: scale(0.9); opacity: 0.35; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
+        .state-circle svg {
+            width: 44px;
+            height: 44px;
+            stroke-width: 2.5;
+        }
+
+        .state-success .state-circle {
+            background: radial-gradient(circle, rgba(0, 214, 143, 0.18), transparent 70%);
+            color: var(--success);
+            box-shadow: inset 0 0 0 1px rgba(0, 214, 143, 0.3), 0 0 40px var(--success-glow);
+        }
+
+        .state-error .state-circle {
+            background: radial-gradient(circle, rgba(255, 77, 109, 0.18), transparent 70%);
+            color: var(--error);
+            box-shadow: inset 0 0 0 1px rgba(255, 77, 109, 0.3), 0 0 40px var(--error-glow);
+        }
+
+        .state-warning .state-circle {
+            background: radial-gradient(circle, rgba(255, 181, 71, 0.18), transparent 70%);
+            color: var(--warning);
+            box-shadow: inset 0 0 0 1px rgba(255, 181, 71, 0.3), 0 0 40px var(--warning-glow);
+        }
+
+        /* Desenho animado do path SVG */
+        .draw-path {
+            stroke-dasharray: 60;
+            stroke-dashoffset: 60;
+        }
+
+        .card[data-state="success"] .draw-path,
+        .card[data-state="error"] .draw-path,
+        .card[data-state="warning"] .draw-path {
+            animation: drawPath 0.55s cubic-bezier(0.65, 0, 0.35, 1) 0.15s forwards;
+        }
+
+        @keyframes drawPath {
+            to { stroke-dashoffset: 0; }
         }
 
         /* Texto */
@@ -235,6 +337,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            transition: opacity 0.3s ease;
         }
 
         .subtitle {
@@ -243,6 +346,7 @@
             line-height: 1.6;
             font-weight: 400;
             margin-bottom: 28px;
+            min-height: 44px;
         }
 
         /* Barra de progresso */
@@ -254,6 +358,7 @@
             overflow: hidden;
             position: relative;
             margin-bottom: 24px;
+            transition: opacity 0.3s ease;
         }
 
         .progress-bar {
@@ -263,8 +368,8 @@
             background-size: 200% 100%;
             border-radius: 100px;
             animation: shimmer 2s linear infinite;
-            width: 70%;
-            transition: width 0.4s ease;
+            width: 20%;
+            transition: width 0.5s cubic-bezier(0.65, 0, 0.35, 1), background 0.4s ease;
         }
 
         @keyframes shimmer {
@@ -272,7 +377,25 @@
             100% { background-position: -200% 0; }
         }
 
-        /* Status */
+        .card[data-state="success"] .progress-bar {
+            background: var(--success);
+            animation: none;
+            width: 100%;
+        }
+
+        .card[data-state="error"] .progress-bar {
+            background: var(--error);
+            animation: none;
+            width: 100%;
+        }
+
+        .card[data-state="warning"] .progress-bar {
+            background: var(--warning);
+            animation: none;
+            width: 100%;
+        }
+
+        /* Status pill */
         .status {
             display: inline-flex;
             align-items: center;
@@ -284,6 +407,7 @@
             border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 100px;
             font-weight: 500;
+            transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
         }
 
         .status-dot {
@@ -293,11 +417,101 @@
             background: var(--success);
             box-shadow: 0 0 10px var(--success);
             animation: blink 1.8s ease-in-out infinite;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
         }
 
         @keyframes blink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.35; }
+        }
+
+        .card[data-state="error"] .status {
+            color: var(--error);
+            border-color: rgba(255, 77, 109, 0.2);
+            background: rgba(255, 77, 109, 0.06);
+        }
+        .card[data-state="error"] .status-dot {
+            background: var(--error);
+            box-shadow: 0 0 10px var(--error);
+            animation: none;
+        }
+
+        .card[data-state="success"] .status {
+            color: var(--success);
+            border-color: rgba(0, 214, 143, 0.2);
+            background: rgba(0, 214, 143, 0.06);
+        }
+        .card[data-state="success"] .status-dot {
+            animation: none;
+        }
+
+        .card[data-state="warning"] .status {
+            color: var(--warning);
+            border-color: rgba(255, 181, 71, 0.2);
+            background: rgba(255, 181, 71, 0.06);
+        }
+        .card[data-state="warning"] .status-dot {
+            background: var(--warning);
+            box-shadow: 0 0 10px var(--warning);
+            animation: none;
+        }
+
+        /* Botão de ação */
+        .actions {
+            margin-top: 26px;
+            display: none;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .card[data-state="error"] .actions,
+        .card[data-state="warning"] .actions {
+            display: flex;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 20px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.15s ease, box-shadow 0.25s ease, background 0.25s ease;
+            user-select: none;
+        }
+
+        .btn:active { transform: translateY(1px); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            box-shadow: 0 6px 20px rgba(0, 158, 227, 0.35);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 8px 26px rgba(0, 158, 227, 0.5);
+        }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.09);
+        }
+
+        .btn svg {
+            width: 14px;
+            height: 14px;
         }
 
         /* Rodapé */
@@ -317,34 +531,6 @@
             height: 12px;
         }
 
-        /* Estado de erro */
-        .error-state .spinner-wrap::before,
-        .error-state .spinner-wrap::after {
-            animation: none;
-            border-color: transparent;
-            border-top-color: var(--error);
-            border-right-color: var(--error);
-        }
-
-        .error-state .spinner-core {
-            background: radial-gradient(circle, rgba(255, 77, 109, 0.25), transparent 70%);
-        }
-
-        .error-state .spinner-core svg {
-            color: var(--error);
-        }
-
-        .error-state .progress-bar {
-            background: var(--error);
-            animation: none;
-            width: 100%;
-        }
-
-        .error-state .status-dot {
-            background: var(--error);
-            box-shadow: 0 0 10px var(--error);
-        }
-
         /* Responsivo */
         @media (max-width: 480px) {
             .card { padding: 36px 24px; }
@@ -357,17 +543,49 @@
     <div class="grid-bg"></div>
 
     <div class="container">
-        <div class="card" id="card">
+        <div class="card" id="card" data-state="loading">
             <div class="brand">
                 <div class="brand-mark"></div>
                 <span>NOXXIT</span>
             </div>
 
-            <div class="spinner-wrap">
-                <div class="spinner-core">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-                    </svg>
+            <div class="icon-stage">
+                <!-- Loading -->
+                <div class="icon-layer loading">
+                    <div class="spinner-wrap">
+                        <div class="spinner-core">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sucesso -->
+                <div class="icon-layer success state-success">
+                    <div class="state-circle">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path class="draw-path" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Erro -->
+                <div class="icon-layer error state-error">
+                    <div class="state-circle">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path class="draw-path" d="M6 6l12 12M18 6L6 18"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Aviso -->
+                <div class="icon-layer warning state-warning">
+                    <div class="state-circle">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <path class="draw-path" d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                        </svg>
+                    </div>
                 </div>
             </div>
 
@@ -384,13 +602,25 @@
                 <span class="status-dot"></span>
                 <span id="statusText">Estabelecendo conexão segura</span>
             </div>
+
+            <div class="actions">
+                <a class="btn btn-primary" id="retryBtn" href="">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Tentar novamente
+                </a>
+                <a class="btn btn-ghost" id="manualBtn" href="" style="display:none;">
+                    Continuar manualmente
+                </a>
+            </div>
         </div>
 
         <div class="footer">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <span>Conexão criptografada • OAuth 2.0</span>
+            <span id="footerText">Conexão criptografada • OAuth 2.0</span>
         </div>
     </div>
 
@@ -398,68 +628,161 @@
         (function () {
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
-            const state = urlParams.get('state');
             const error = urlParams.get('error');
             const errorDescription = urlParams.get('error_description');
 
             // ⚠️ COLOQUE AQUI O LINK ATUAL DO SEU REPLIT
             const replitDomain = "https://2c2bc751-9e6e-4311-acbc-db44d63cdb03-00-1hscgqmw3rhon.riker.replit.dev:8080";
+            const cleanDomain = replitDomain ? replitDomain.replace(/\/+$/, '') : '';
 
-            const statuses = [
-                'Estabelecendo conexão segura',
-                'Validando credenciais',
-                'Sincronizando com Mercado Pago',
-                'Finalizando autenticação'
-            ];
-
-            let statusIndex = 0;
-            const statusEl = document.getElementById('statusText');
+            const card = document.getElementById('card');
+            const titleEl = document.getElementById('title');
+            const subtitleEl = document.getElementById('subtitle');
+            const statusTextEl = document.getElementById('statusText');
+            const footerTextEl = document.getElementById('footerText');
             const progressBar = document.getElementById('progressBar');
-            const statusInterval = setInterval(() => {
-                statusIndex = (statusIndex + 1) % statuses.length;
-                statusEl.textContent = statuses[statusIndex];
-                progressBar.style.width = Math.min(95, 30 + statusIndex * 20) + '%';
-            }, 900);
+            const retryBtn = document.getElementById('retryBtn');
+            const manualBtn = document.getElementById('manualBtn');
 
-            function showError(title, message) {
-                clearInterval(statusInterval);
-                document.getElementById('card').classList.add('error-state');
-                document.getElementById('title').textContent = title;
-                document.getElementById('subtitle').textContent = message;
-                document.getElementById('statusText').textContent = 'Falha na autenticação';
-                progressBar.style.width = '100%';
+            let statusInterval = null;
+            let redirectTimer = null;
+            let safetyTimer = null;
+
+            function setState(state) {
+                card.dataset.state = state;
+                document.body.dataset.theme = state === 'loading' ? '' : state;
             }
 
+            function stopTimers() {
+                if (statusInterval) clearInterval(statusInterval);
+                if (redirectTimer) clearTimeout(redirectTimer);
+                if (safetyTimer) clearTimeout(safetyTimer);
+            }
+
+            /* ---------- Estado: carregando ---------- */
+            function showLoading() {
+                setState('loading');
+                const statuses = [
+                    'Estabelecendo conexão segura...',
+                    'Validando credenciais...',
+                    'Sincronizando com Mercado Pago...',
+                    'Finalizando autenticação...'
+                ];
+                let i = 0;
+                progressBar.style.width = '20%';
+                statusInterval = setInterval(() => {
+                    i = (i + 1) % statuses.length;
+                    statusTextEl.textContent = statuses[i];
+                    progressBar.style.width = Math.min(90, 30 + i * 20) + '%';
+                }, 900);
+            }
+
+            /* ---------- Estado: sucesso ---------- */
+            function showSuccess(redirectUrl) {
+                stopTimers();
+                setState('success');
+                titleEl.textContent = 'Autenticado com sucesso!';
+                subtitleEl.textContent = 'Sua conta do Mercado Pago foi conectada. Redirecionando...';
+                footerTextEl.textContent = 'Sessão verificada • OAuth 2.0';
+                progressBar.style.width = '100%';
+
+                // Botão manual de fallback caso o redirect demore
+                manualBtn.style.display = 'inline-flex';
+                manualBtn.href = redirectUrl;
+                manualBtn.textContent = 'Ir agora';
+
+                redirectTimer = setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 900);
+            }
+
+            /* ---------- Estado: erro ---------- */
+            function showError(title, message, retryHref) {
+                stopTimers();
+                setState('error');
+                titleEl.textContent = title;
+                subtitleEl.textContent = message;
+                statusTextEl.textContent = 'Falha na autenticação';
+                footerTextEl.textContent = 'Erro reportado • OAuth 2.0';
+                progressBar.style.width = '100%';
+                manualBtn.style.display = 'none';
+
+                if (retryHref) {
+                    retryBtn.style.display = 'inline-flex';
+                    retryBtn.href = retryHref;
+                } else {
+                    retryBtn.style.display = 'none';
+                }
+            }
+
+            /* ---------- Estado: aviso ---------- */
+            function showWarning(title, message, actionHref, actionLabel) {
+                stopTimers();
+                setState('warning');
+                titleEl.textContent = title;
+                subtitleEl.textContent = message;
+                statusTextEl.textContent = 'Aguardando ação';
+                footerTextEl.textContent = 'Verificação necessária • OAuth 2.0';
+                progressBar.style.width = '100%';
+                retryBtn.style.display = 'none';
+
+                if (actionHref) {
+                    manualBtn.style.display = 'inline-flex';
+                    manualBtn.href = actionHref;
+                    manualBtn.textContent = actionLabel || 'Continuar';
+                } else {
+                    manualBtn.style.display = 'none';
+                }
+            }
+
+            /* ---------- Fluxo ---------- */
+            showLoading();
+
+            // Erro retornado pelo provedor OAuth
             if (error) {
-                showError(
-                    'Não foi possível autenticar',
-                    errorDescription
-                        ? decodeURIComponent(errorDescription)
-                        : 'Ocorreu um erro durante a autorização. Tente novamente.'
-                );
+                const friendly = {
+                    access_denied: 'Você cancelou a autorização.',
+                    invalid_request: 'A solicitação de autenticação estava incompleta ou inválida.',
+                    server_error: 'O Mercado Pago encontrou um erro interno. Tente novamente em alguns instantes.',
+                    temporarily_unavailable: 'O serviço do Mercado Pago está temporariamente indisponível. Tente novamente em alguns instantes.'
+                }[error] || (errorDescription
+                    ? decodeURIComponent(errorDescription)
+                    : 'Ocorreu um erro durante a autorização.');
+
+                showError('Não foi possível autenticar', friendly, window.location.pathname);
                 return;
             }
 
+            // Sem código na URL
             if (!code) {
-                showError(
-                    'Parâmetros ausentes',
-                    'Nenhum código de autorização foi recebido. Reinicie o processo de login.'
+                showWarning(
+                    'Nenhum código recebido',
+                    'O provedor não retornou um código de autorização. Isso pode acontecer se a página foi aberta diretamente.',
+                    window.location.pathname,
+                    'Reiniciar login'
                 );
                 return;
             }
 
-            if (replitDomain) {
-                const cleanDomain = replitDomain.replace(/\/+$/, '');
-                progressBar.style.width = '100%';
-                setTimeout(() => {
-                    window.location.href = `${cleanDomain}/oauth/callback${window.location.search}`;
-                }, 700);
-            } else {
+            // Domínio não configurado
+            if (!cleanDomain) {
                 showError(
                     'Configuração pendente',
-                    'O domínio do servidor não foi configurado corretamente.'
+                    'O servidor de destino não está configurado. Entre em contato com o suporte.',
+                    null
                 );
+                return;
             }
+
+            // Sucesso — redireciona
+            const target = `${cleanDomain}/oauth/callback${window.location.search}`;
+            showSuccess(target);
+
+            // Safety net: se por algum motivo o redirect não rolou em 6s, deixa explícito
+            safetyTimer = setTimeout(() => {
+                statusTextEl.textContent = 'Aguardando redirecionamento';
+                subtitleEl.textContent = 'O redirecionamento está demorando mais que o esperado. Clique em "Ir agora" para continuar.';
+            }, 6000);
         })();
     </script>
 </body>
