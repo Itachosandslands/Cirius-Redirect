@@ -2,24 +2,465 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Redirecionando - NOXXIT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autenticando • NOXXIT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #009ee3;
+            --primary-dark: #007eb5;
+            --accent: #00d4ff;
+            --bg-dark: #0a0e1a;
+            --bg-darker: #050810;
+            --text: #e6edf3;
+            --text-dim: #8b95a5;
+            --success: #00d68f;
+            --error: #ff4d6d;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: radial-gradient(ellipse at top, #0f1626 0%, var(--bg-darker) 70%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Partículas de fundo */
+        body::before,
+        body::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.35;
+            pointer-events: none;
+        }
+
+        body::before {
+            width: 500px;
+            height: 500px;
+            background: var(--primary);
+            top: -200px;
+            left: -200px;
+            animation: float 12s ease-in-out infinite;
+        }
+
+        body::after {
+            width: 400px;
+            height: 400px;
+            background: var(--accent);
+            bottom: -150px;
+            right: -150px;
+            animation: float 15s ease-in-out infinite reverse;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(60px, 40px) scale(1.15); }
+        }
+
+        /* Grid sutil de fundo */
+        .grid-bg {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+            -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 460px;
+            padding: 24px;
+            animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            background: linear-gradient(155deg, rgba(22, 30, 48, 0.85) 0%, rgba(12, 17, 30, 0.9) 100%);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 44px 36px;
+            text-align: center;
+            box-shadow:
+                0 24px 60px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+                0 1px 0 rgba(255, 255, 255, 0.05) inset;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 158, 227, 0.6), transparent);
+        }
+
+        /* Logo / Marca */
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 32px;
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: 2px;
+            color: var(--text);
+        }
+
+        .brand-mark {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 6px 20px rgba(0, 158, 227, 0.4);
+        }
+
+        .brand-mark::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border: 2.5px solid white;
+            border-radius: 4px;
+            border-right-color: transparent;
+            border-bottom-color: transparent;
+            transform: rotate(45deg);
+            margin-top: 2px;
+        }
+
+        /* Spinner */
+        .spinner-wrap {
+            position: relative;
+            width: 88px;
+            height: 88px;
+            margin: 0 auto 28px;
+        }
+
+        .spinner-wrap::before,
+        .spinner-wrap::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid transparent;
+        }
+
+        .spinner-wrap::before {
+            inset: 0;
+            border-top-color: var(--primary);
+            border-right-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+
+        .spinner-wrap::after {
+            inset: 12px;
+            border-bottom-color: var(--accent);
+            border-left-color: var(--accent);
+            animation: spin 1.6s linear infinite reverse;
+            opacity: 0.7;
+        }
+
+        .spinner-core {
+            position: absolute;
+            inset: 26px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 158, 227, 0.25), transparent 70%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .spinner-core svg {
+            width: 24px;
+            height: 24px;
+            color: var(--accent);
+            filter: drop-shadow(0 0 8px rgba(0, 212, 255, 0.6));
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        /* Texto */
+        h1 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            letter-spacing: -0.3px;
+            background: linear-gradient(180deg, #ffffff 0%, #b8c4d6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-dim);
+            line-height: 1.6;
+            font-weight: 400;
+            margin-bottom: 28px;
+        }
+
+        /* Barra de progresso */
+        .progress {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 100px;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .progress-bar {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, var(--primary), var(--accent), var(--primary));
+            background-size: 200% 100%;
+            border-radius: 100px;
+            animation: shimmer 2s linear infinite;
+            width: 70%;
+            transition: width 0.4s ease;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Status */
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-dim);
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 100px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 10px var(--success);
+            animation: blink 1.8s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.35; }
+        }
+
+        /* Rodapé */
+        .footer {
+            margin-top: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--text-dim);
+            opacity: 0.75;
+        }
+
+        .footer svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        /* Estado de erro */
+        .error-state .spinner-wrap::before,
+        .error-state .spinner-wrap::after {
+            animation: none;
+            border-color: transparent;
+            border-top-color: var(--error);
+            border-right-color: var(--error);
+        }
+
+        .error-state .spinner-core {
+            background: radial-gradient(circle, rgba(255, 77, 109, 0.25), transparent 70%);
+        }
+
+        .error-state .spinner-core svg {
+            color: var(--error);
+        }
+
+        .error-state .progress-bar {
+            background: var(--error);
+            animation: none;
+            width: 100%;
+        }
+
+        .error-state .status-dot {
+            background: var(--error);
+            box-shadow: 0 0 10px var(--error);
+        }
+
+        /* Responsivo */
+        @media (max-width: 480px) {
+            .card { padding: 36px 24px; }
+            h1 { font-size: 19px; }
+            .container { padding: 16px; }
+        }
+    </style>
 </head>
 <body>
-    <p>Autenticando com o Mercado Pago, aguarde...</p>
+    <div class="grid-bg"></div>
+
+    <div class="container">
+        <div class="card" id="card">
+            <div class="brand">
+                <div class="brand-mark"></div>
+                <span>NOXXIT</span>
+            </div>
+
+            <div class="spinner-wrap">
+                <div class="spinner-core">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <h1 id="title">Autenticando com segurança</h1>
+            <p class="subtitle" id="subtitle">
+                Estamos conectando sua conta do Mercado Pago. Isso leva apenas alguns segundos.
+            </p>
+
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <div class="status">
+                <span class="status-dot"></span>
+                <span id="statusText">Estabelecendo conexão segura</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>Conexão criptografada • OAuth 2.0</span>
+        </div>
+    </div>
+
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
-        const state = urlParams.get('state');
-        const error = urlParams.get('error');
+        (function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+            const error = urlParams.get('error');
+            const errorDescription = urlParams.get('error_description');
 
-        // ⚠️ COLOQUE AQUI O LINK ATUAL DO SEU REPLIT 
-        const replitDomain = "https://2c2bc751-9e6e-4311-acbc-db44d63cdb03-00-1hscgqmw3rhon.riker.replit.dev:8080/";
+            // ⚠️ COLOQUE AQUI O LINK ATUAL DO SEU REPLIT
+            const replitDomain = "https://2c2bc751-9e6e-4311-acbc-db44d63cdb03-00-1hscgqmw3rhon.riker.replit.dev:8080";
 
-        if (replitDomain && (code || error)) {
-            window.location.href = `${replitDomain}/oauth/callback${window.location.search}`;
-        } else {
-            document.body.innerHTML = "<h3>Erro: Parâmetros de autorização não encontrados.</h3>";
-        }
+            const statuses = [
+                'Estabelecendo conexão segura',
+                'Validando credenciais',
+                'Sincronizando com Mercado Pago',
+                'Finalizando autenticação'
+            ];
+
+            let statusIndex = 0;
+            const statusEl = document.getElementById('statusText');
+            const progressBar = document.getElementById('progressBar');
+            const statusInterval = setInterval(() => {
+                statusIndex = (statusIndex + 1) % statuses.length;
+                statusEl.textContent = statuses[statusIndex];
+                progressBar.style.width = Math.min(95, 30 + statusIndex * 20) + '%';
+            }, 900);
+
+            function showError(title, message) {
+                clearInterval(statusInterval);
+                document.getElementById('card').classList.add('error-state');
+                document.getElementById('title').textContent = title;
+                document.getElementById('subtitle').textContent = message;
+                document.getElementById('statusText').textContent = 'Falha na autenticação';
+                progressBar.style.width = '100%';
+            }
+
+            if (error) {
+                showError(
+                    'Não foi possível autenticar',
+                    errorDescription
+                        ? decodeURIComponent(errorDescription)
+                        : 'Ocorreu um erro durante a autorização. Tente novamente.'
+                );
+                return;
+            }
+
+            if (!code) {
+                showError(
+                    'Parâmetros ausentes',
+                    'Nenhum código de autorização foi recebido. Reinicie o processo de login.'
+                );
+                return;
+            }
+
+            if (replitDomain) {
+                const cleanDomain = replitDomain.replace(/\/+$/, '');
+                progressBar.style.width = '100%';
+                setTimeout(() => {
+                    window.location.href = `${cleanDomain}/oauth/callback${window.location.search}`;
+                }, 700);
+            } else {
+                showError(
+                    'Configuração pendente',
+                    'O domínio do servidor não foi configurado corretamente.'
+                );
+            }
+        })();
     </script>
 </body>
 </html>
